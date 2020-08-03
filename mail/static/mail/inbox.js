@@ -76,7 +76,11 @@ function load_mailbox(mailbox) {
       // View email
       div.addEventListener("click", function(event) {
         console.log(event.target.id);
-        view_email(event.target.id);
+        if (mailbox === 'sent') {
+          view_email_sent(event.target.id);
+        } else {
+          view_email(event.target.id);
+        }
       });
     }
   });
@@ -202,6 +206,80 @@ function view_email(email_id) {
       document.querySelector('#unarchive').addEventListener('click', function(){
         unarchive(email.id);
       });
+  });
+}
+
+
+function view_email_sent(email_id) {
+  fetch(`/emails/${email_id}`, {
+    method: 'GET',
+  })
+  .then(response => response.json())
+  .then(email => {
+      // Print email
+      console.log(email);
+
+      // Clears out view email history
+      document.querySelector('#email-view').innerHTML = '';
+
+      // Show email view and hide others
+      document.querySelector('#emails-view').style.display = 'none';
+      document.querySelector('#email-view').style.display = 'block';
+      document.querySelector('#compose-view').style.display = 'none';
+      
+      // Show email
+      let div = document.createElement('div');
+      div.className = 'row';
+      var div0 = document.createElement('div');
+      div0.className = 'col-sm-12';
+      var s = document.createElement('p');
+      s.innerHTML = `From: ${email.sender}`;
+      var r = document.createElement('p');
+      r.innerHTML = `To: ${email.recipients}`;
+      var sub = document.createElement('p');
+      sub.innerHTML = `Subject: ${email.subject}`;
+      var t = document.createElement('p');
+      t.innerHTML = `Timestamp: ${email.timestamp}`;
+
+      div.appendChild(div0)
+      div0.appendChild(s);
+      div0.appendChild(r);
+      div0.appendChild(sub);
+      div0.appendChild(t);
+
+      let div0_1 = document.createElement('div');
+      div0_1.className = 'row';
+      div0_1.style.borderBottom = "thin solid";
+      var div1 = document.createElement('div');
+      div1.className = 'btn-group';
+      var rp = document.createElement('button');
+      rp.className = 'btn btn-primary rounded mr-1';
+      rp.type = 'submit';
+      rp.id = 'reply';
+      rp.innerHTML = 'Reply';
+      rp.style.margin = '1px 10px 20px 10px';
+
+      div0_1.appendChild(div1);
+      div1.appendChild(rp);
+
+      let div2 = document.createElement('div');
+      div2.className = 'row';
+      var b = document.createElement('p');
+      b.innerHTML = `${email.body}`;
+
+      div2.appendChild(b);
+
+      document.querySelector('#email-view').append(div);
+      document.querySelector('#email-view').append(div0_1);
+      document.querySelector('#email-view').append(div2);
+
+      // Mark email as read
+      read(email.id);
+
+      // If reply clicked
+      document.querySelector('#reply').addEventListener('click', function() {
+        reply(email.id);
+      }, false);
   });
 }
 
